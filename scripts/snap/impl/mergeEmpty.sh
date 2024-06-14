@@ -1,5 +1,7 @@
 #!/bin/bash
 
+## !!! Be careful using this script separately from the main scripts in the parent folder
+##
 ## This script merges a commit with discarding all the changes in it.
 ## It is useful when you don't want to merge some changes, but want to change a base commit, solving all future conflicts.
 
@@ -12,7 +14,7 @@ fi
 
 COMMIT=$1
 
-ROOT_DIR="$(dirname "$0")/.."
+ROOT_DIR="$(dirname "$0")/../../.."
 
 (
     cd $ROOT_DIR; 
