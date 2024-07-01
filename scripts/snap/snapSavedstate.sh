@@ -1,1 +1,1 @@
-$(dirname "$0")/impl/snapToJbMain.sh 'compose/savedstate'
+$(dirname "$0")/impl/snapToJbMain.sh 'savedstate'
