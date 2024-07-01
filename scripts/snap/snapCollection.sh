@@ -1,1 +1,1 @@
-$(dirname "$0")/impl/snapToJbMain.sh 'compose/collection'
+$(dirname "$0")/impl/snapToJbMain.sh 'collection'
