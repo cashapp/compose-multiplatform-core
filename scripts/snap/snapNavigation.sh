@@ -1,1 +1,1 @@
-$(dirname "$0")/impl/snapToJbMain.sh 'compose/navigation'
+$(dirname "$0")/impl/snapToJbMain.sh 'navigation'
