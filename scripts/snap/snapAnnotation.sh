@@ -1,1 +1,1 @@
-$(dirname "$0")/impl/snapToJbMain.sh 'compose/annotation'
+$(dirname "$0")/impl/snapToJbMain.sh 'annotation'
