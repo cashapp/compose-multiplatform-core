@@ -1,1 +1,1 @@
-$(dirname "$0")/impl/snapToJbMain.sh 'compose/lifecycle'
+$(dirname "$0")/impl/snapToJbMain.sh 'lifecycle'
