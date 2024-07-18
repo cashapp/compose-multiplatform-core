@@ -15,6 +15,7 @@ ALL_FOLDERS=${@:1}
 CURRENT_COMMIT=$(git rev-parse --short @)
 BRANCH_TO_RESTORE_IN_THE_END=$(git branch --show-current)
 
+
 JB_MAIN_BRANCH=$(git config branch.jb-main.remote)/jb-main
 TO_JB_MAIN_BRANCH=integration-snap/$CURRENT_COMMIT/to-jb-main
 git checkout --quiet $(git merge-base $CURRENT_COMMIT $JB_MAIN_BRANCH) -B $TO_JB_MAIN_BRANCH
