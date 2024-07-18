@@ -1,6 +1,7 @@
 #!/bin/bash
 
-## See ../Readme.md for the purpose of this script
+# This script is rarely needed to be used explicitly.
+# Use parent scripts and see the parent Readme.md
 
 set -e
 
