@@ -12,18 +12,19 @@ fi
 
 DIR=$(dirname "$0")
 ALL_FOLDERS=${@:1}
+FIRST_FOLDER=$1
+FIRST_FOLDER=${FIRST_FOLDER////-} # replace / by -
 CURRENT_COMMIT=$(git rev-parse --short @)
 BRANCH_TO_RESTORE_IN_THE_END=$(git branch --show-current)
 
-
 JB_MAIN_BRANCH=$(git config branch.jb-main.remote)/jb-main
-TO_JB_MAIN_BRANCH=integration-snap/$CURRENT_COMMIT/to-jb-main
+TO_JB_MAIN_BRANCH=integration-snap/$FIRST_FOLDER/$CURRENT_COMMIT/to-jb-main
 git checkout --quiet $(git merge-base $CURRENT_COMMIT $JB_MAIN_BRANCH) -B $TO_JB_MAIN_BRANCH
 $DIR/snapSubfolder.sh $CURRENT_COMMIT $ALL_FOLDERS
 echo "Created $TO_JB_MAIN_BRANCH"
 
 INTEGRATION_BRANCH=$(git config branch.integration.remote)/integration
-TO_INTEGRATION_BRANCH=integration-snap/$CURRENT_COMMIT/to-integration
+TO_INTEGRATION_BRANCH=integration-snap/$FIRST_FOLDER/$CURRENT_COMMIT/to-integration
 git checkout --quiet $(git merge-base $CURRENT_COMMIT $INTEGRATION_BRANCH) -B $TO_INTEGRATION_BRANCH
 $DIR/mergeEmpty.sh $TO_JB_MAIN_BRANCH
 echo "Created $TO_INTEGRATION_BRANCH"
