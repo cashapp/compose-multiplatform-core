@@ -1,8 +1,8 @@
 The purposes of these scripts is to merge some subfolder (aka "snap") to jb-main branch from "integration" or "integration-release/*".
 
-1. Checkout the commit you want to snap
+1. Checkout the commit you want to snap ("integration" or "integration-release/*")
 
-2. [for integration branch] Merge jb-main to integration (not required, but useful to reduce conflicts)
+2. Merge jb-main to integration, pick "jb-main" state in a case of conflicts in other folders
 
 3. Call ./snapCompose.sh (use another script for another folder)
 
