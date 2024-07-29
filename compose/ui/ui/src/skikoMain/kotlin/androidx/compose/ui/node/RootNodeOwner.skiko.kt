@@ -322,12 +322,10 @@ internal class RootNodeOwner(
         override val softwareKeyboardController =
             DelegatingSoftwareKeyboardController(textInputService)
 
-        // TODO https://youtrack.jetbrains.com/issue/COMPOSE-733/Merge-1.6.-Apply-changes-for-the-new-text-input
         override suspend fun textInputSession(
             session: suspend PlatformTextInputSessionScope.() -> Nothing
-        ): Nothing {
-            awaitCancellation()
-        }
+        ) = platformContext.textInputSession(session)
+
         override val dragAndDropManager: DragAndDropManager = this@RootNodeOwner.dragAndDropManager
         override val pointerIconService = PointerIconServiceImpl()
         override val focusOwner get() = this@RootNodeOwner.focusOwner

@@ -16,4 +16,27 @@
 
 package androidx.compose.ui.platform
 
-actual interface PlatformTextInputMethodRequest
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.EditCommand
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.ImeOptions
+
+actual interface PlatformTextInputMethodRequest {
+    val state: TextFieldStateAdapter
+    val imeOptions: ImeOptions
+    val onEditCommand: (List<EditCommand>) -> Unit
+    val onImeAction: ((ImeAction) -> Unit)?
+}
+
+/**
+ * The purpose of this interface is to provide, in the `ui` module, an adapter for
+ * `TransformedTextFieldStateAdapter`, which is in the `foundation` module.
+ *
+ * It exposes all the properties of `TransformedTextFieldStateAdapter` that are necessary for
+ * implementing input methods.
+ */
+interface TextFieldStateAdapter {
+    val text: CharSequence
+    val selection: TextRange
+    val composition: TextRange?
+}

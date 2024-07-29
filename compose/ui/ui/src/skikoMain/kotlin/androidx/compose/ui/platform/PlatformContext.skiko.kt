@@ -46,6 +46,7 @@ import androidx.compose.ui.text.input.ImeOptions
 import androidx.compose.ui.text.input.PlatformTextInputService
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlin.reflect.KProperty
+import kotlinx.coroutines.awaitCancellation
 
 /**
  * Platform context that provides platform-specific bindings.
@@ -109,6 +110,13 @@ interface PlatformContext {
     val viewConfiguration: ViewConfiguration get() = EmptyViewConfiguration
     val inputModeManager: InputModeManager
     val textInputService: PlatformTextInputService get() = EmptyPlatformTextInputService
+
+    suspend fun textInputSession(
+        session: suspend PlatformTextInputSessionScope.() -> Nothing
+    ): Nothing {
+        awaitCancellation()
+    }
+
     val textToolbar: TextToolbar get() = EmptyTextToolbar
     fun setPointerIcon(pointerIcon: PointerIcon) = Unit
 
