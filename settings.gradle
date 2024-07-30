@@ -256,3 +256,4 @@ includeProject(":internal-testutils-mockito", "testutils/testutils-mockito")
 includeBuild("placeholder")
 
 includeProject(":mpp")
+includeProject(":window:window-core")

@@ -107,6 +107,9 @@ val libraryToComponents = mapOf(
     "SAVEDSTATE" to listOf(
         ComposeComponent(":savedstate:savedstate", viewModelPlatforms),
     ),
+    "WINDOW" to listOf(
+        ComposeComponent(":window:window-core", viewModelPlatforms),
+    ),
 )
 
 val libraryToTasks = mapOf(
