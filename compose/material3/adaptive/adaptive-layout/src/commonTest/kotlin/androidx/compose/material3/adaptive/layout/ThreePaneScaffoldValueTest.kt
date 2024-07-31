@@ -17,13 +17,10 @@
 package androidx.compose.material3.adaptive.layout
 
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import com.google.common.truth.Truth.assertThat
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@RunWith(JUnit4::class)
 class ThreePaneScaffoldValueTest {
     @Test
     fun calculateWithoutHistory_onePaneLayout_noDestination() {
@@ -163,7 +160,7 @@ class ThreePaneScaffoldValueTest {
         role: ThreePaneScaffoldRole,
         state: PaneAdaptedValue
     ) {
-        assertThat(this[role]).isEqualTo(state)
+        assertEquals(state, this[role])
     }
 
     companion object {

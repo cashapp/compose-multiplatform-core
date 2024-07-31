@@ -21,13 +21,10 @@ import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.VectorizedAnimationSpec
 import androidx.compose.animation.core.spring
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import com.google.common.truth.Truth.assertThat
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@RunWith(JUnit4::class)
 class ThreePaneMotionTest {
     @Test
     fun noPane_noMotion() {
@@ -46,7 +43,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(ThreePaneMotion.NoMotion)
+        assertEquals(ThreePaneMotion.NoMotion, motions)
     }
 
     @Test
@@ -66,7 +63,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToLeftMotion(SpacerSize))
+        assertEquals(MovePanesToLeftMotion(SpacerSize), motions)
     }
 
     @Test
@@ -86,7 +83,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToLeftMotion(SpacerSize))
+        assertEquals(MovePanesToLeftMotion(SpacerSize), motions)
     }
 
     @Test
@@ -106,7 +103,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToLeftMotion(SpacerSize))
+        assertEquals(MovePanesToLeftMotion(SpacerSize), motions)
     }
 
     @Test
@@ -126,7 +123,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToRightMotion(SpacerSize))
+        assertEquals(MovePanesToRightMotion(SpacerSize), motions)
     }
 
     @Test
@@ -146,7 +143,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToRightMotion(SpacerSize))
+        assertEquals(MovePanesToRightMotion(SpacerSize), motions)
     }
 
     @Test
@@ -166,7 +163,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToRightMotion(SpacerSize))
+        assertEquals(MovePanesToRightMotion(SpacerSize), motions)
     }
 
     @Test
@@ -186,7 +183,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToLeftMotion(SpacerSize))
+        assertEquals(MovePanesToLeftMotion(SpacerSize), motions)
     }
 
     @Test
@@ -206,7 +203,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(MovePanesToRightMotion(SpacerSize))
+        assertEquals(MovePanesToRightMotion(SpacerSize), motions)
     }
 
     @Test
@@ -226,7 +223,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(SwitchRightTwoPanesMotion(SpacerSize))
+        assertEquals(SwitchRightTwoPanesMotion(SpacerSize), motions)
     }
 
     @Test
@@ -246,7 +243,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(SwitchRightTwoPanesMotion(SpacerSize))
+        assertEquals(SwitchRightTwoPanesMotion(SpacerSize), motions)
     }
 
     @Test
@@ -266,7 +263,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(SwitchLeftTwoPanesMotion(SpacerSize))
+        assertEquals(SwitchLeftTwoPanesMotion(SpacerSize), motions)
     }
 
     @Test
@@ -286,7 +283,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(SwitchLeftTwoPanesMotion(SpacerSize))
+        assertEquals(SwitchLeftTwoPanesMotion(SpacerSize), motions)
     }
 
     @Test
@@ -307,7 +304,7 @@ class ThreePaneMotionTest {
                 PaneOrder,
                 SpacerSize
             )
-        assertThat(motions).isEqualTo(ThreePaneMotion.NoMotion)
+        assertEquals(ThreePaneMotion.NoMotion, motions)
     }
 
     @Test
@@ -353,7 +350,7 @@ class ThreePaneMotionTest {
     ): Float = getValueFromNanos(playTimeNanos, InitialValue, TargetValue, InitialVelocity).value
 
     private fun assertValuesAreEqual(value1: Float, value2: Float) {
-        assertThat(value1 - value2).isWithin(Tolerance)
+        assertEquals(value1, value2, Tolerance)
     }
 
     companion object {
