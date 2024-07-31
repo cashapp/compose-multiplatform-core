@@ -22,10 +22,9 @@ import androidx.compose.material3.adaptive.Posture
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.dp
+import androidx.kruth.assertThat
 import androidx.window.core.layout.WindowSizeClass
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 class PaneScaffoldDirectiveTest {
@@ -36,11 +35,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(400f, 800f), Posture())
             )
 
-        assertEquals(1, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(1, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(0.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(0.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -50,11 +49,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(750f, 900f), Posture())
             )
 
-        assertEquals(1, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(1, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(0.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(0.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -64,11 +63,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(1200f, 800f), Posture())
             )
 
-        assertEquals(2, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(1, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(24.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(0.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(2)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(24.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -78,11 +77,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(700f, 800f), Posture(isTabletop = true))
             )
 
-        assertEquals(1, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(2, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(0.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(24.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(2)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(24.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -92,11 +91,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(400f, 800f), Posture())
             )
 
-        assertEquals(1, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(1, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(0.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(0.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -106,11 +105,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(750f, 900f), Posture())
             )
 
-        assertEquals(2, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(1, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(24.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(0.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(2)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(24.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -120,11 +119,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(1200f, 800f), Posture())
             )
 
-        assertEquals(2, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(1, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(24.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(0.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(2)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(1)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(24.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(0.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -134,11 +133,11 @@ class PaneScaffoldDirectiveTest {
                 WindowAdaptiveInfo(WindowSizeClass.compute(700f, 800f), Posture(isTabletop = true))
             )
 
-        assertEquals(2, scaffoldDirective.maxHorizontalPartitions)
-        assertEquals(2, scaffoldDirective.maxVerticalPartitions)
-        assertEquals(24.dp, scaffoldDirective.horizontalPartitionSpacerSize)
-        assertEquals(24.dp, scaffoldDirective.verticalPartitionSpacerSize)
-        assertEquals(360.dp, scaffoldDirective.defaultPanePreferredWidth)
+        assertThat(scaffoldDirective.maxHorizontalPartitions).isEqualTo(2)
+        assertThat(scaffoldDirective.maxVerticalPartitions).isEqualTo(2)
+        assertThat(scaffoldDirective.horizontalPartitionSpacerSize).isEqualTo(24.dp)
+        assertThat(scaffoldDirective.verticalPartitionSpacerSize).isEqualTo(24.dp)
+        assertThat(scaffoldDirective.defaultPanePreferredWidth).isEqualTo(360.dp)
     }
 
     @Test
@@ -152,7 +151,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.AlwaysAvoid
             )
 
-        assertEquals(hingeList.getBounds(), scaffoldDirective.excludedBounds)
+        assertThat(scaffoldDirective.excludedBounds).isEqualTo(hingeList.getBounds())
     }
 
     @Test
@@ -166,7 +165,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.AvoidOccluding
             )
 
-        assertEquals(hingeList.subList(0, 2).getBounds(), scaffoldDirective.excludedBounds)
+        assertThat(scaffoldDirective.excludedBounds).isEqualTo(hingeList.subList(0, 2).getBounds())
     }
 
     @Test
@@ -180,7 +179,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.AvoidSeparating
             )
 
-        assertEquals(hingeList.subList(2, 3).getBounds(), scaffoldDirective.excludedBounds)
+        assertThat(scaffoldDirective.excludedBounds).isEqualTo(hingeList.subList(2, 3).getBounds())
     }
 
     @Test
@@ -194,7 +193,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.NeverAvoid
             )
 
-        assertTrue { scaffoldDirective.excludedBounds.isEmpty() }
+        assertThat(scaffoldDirective.excludedBounds).isEmpty()
     }
 
     @Test
@@ -208,7 +207,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.AlwaysAvoid
             )
 
-        assertEquals(hingeList.getBounds(), scaffoldDirective.excludedBounds)
+        assertThat(scaffoldDirective.excludedBounds).isEqualTo(hingeList.getBounds())
     }
 
     @Test
@@ -222,7 +221,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.AvoidOccluding
             )
 
-        assertEquals(hingeList.subList(0, 2).getBounds(), scaffoldDirective.excludedBounds)
+        assertThat(scaffoldDirective.excludedBounds).isEqualTo(hingeList.subList(0, 2).getBounds())
     }
 
     @Test
@@ -236,7 +235,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.AvoidSeparating
             )
 
-        assertEquals(hingeList.subList(2, 3).getBounds(), scaffoldDirective.excludedBounds)
+        assertThat(scaffoldDirective.excludedBounds).isEqualTo(hingeList.subList(2, 3).getBounds())
     }
 
     @Test
@@ -250,7 +249,7 @@ class PaneScaffoldDirectiveTest {
                 HingePolicy.NeverAvoid
             )
 
-        assertTrue { scaffoldDirective.excludedBounds.isEmpty() }
+        assertThat(scaffoldDirective.excludedBounds).isEmpty()
     }
 }
 

@@ -67,6 +67,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinTest)
                 api(project(":annotation:annotation"))
+                implementation(project(":kruth:kruth"))
             }
         }
 
