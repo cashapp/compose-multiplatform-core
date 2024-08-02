@@ -22,13 +22,22 @@ import androidx.compose.runtime.InternalComposeApi
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.LocalSystemTheme
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draganddrop.DragAndDropModifierNode
+import androidx.compose.ui.draganddrop.DragAndDropTransferData
 import androidx.compose.ui.events.EventTargetListener
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.asComposeCanvas
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.input.InputModeManager
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.toComposeEvent
 import androidx.compose.ui.input.pointer.BrowserCursor
+import androidx.compose.ui.input.pointer.PointerButton
+import androidx.compose.ui.input.pointer.PointerButtons
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.PointerId
@@ -38,13 +47,16 @@ import androidx.compose.ui.input.pointer.composeButton
 import androidx.compose.ui.input.pointer.composeButtons
 import androidx.compose.ui.native.ComposeLayer
 import androidx.compose.ui.platform.DefaultInputModeManager
-import androidx.compose.ui.platform.WebTextInputService
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalInternalViewModelStoreOwner
 import androidx.compose.ui.platform.PlatformContext
+import androidx.compose.ui.platform.PlatformDragAndDropManager
 import androidx.compose.ui.platform.ViewConfiguration
+import androidx.compose.ui.platform.WebTextInputService
 import androidx.compose.ui.platform.WindowInfoImpl
+import androidx.compose.ui.scene.CanvasLayersComposeScene
+import androidx.compose.ui.scene.ComposeSceneContext
 import androidx.compose.ui.scene.ComposeScenePointer
+import androidx.compose.ui.scene.platformContext
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -53,9 +65,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlin.coroutines.coroutineContext
 import kotlinx.browser.document
 import kotlinx.browser.window
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.flow.Flow
@@ -63,7 +77,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.jetbrains.skia.Canvas
 import org.jetbrains.skiko.SkiaLayer
+import org.jetbrains.skiko.SkikoRenderDelegate
 import org.w3c.dom.AddEventListenerOptions
 import org.w3c.dom.Element
 import org.w3c.dom.HTMLCanvasElement
@@ -156,6 +172,8 @@ internal class ComposeWindow(
     content: @Composable () -> Unit,
     private val state: ComposeWindowState
 ) : LifecycleOwner, ViewModelStoreOwner {
+    private var isDisposed = false
+
     private val density: Density = Density(
         density = actualDensity.toFloat(),
         fontScale = 1f
@@ -200,12 +218,52 @@ internal class ComposeWindow(
             }
         }
 
+        override fun createDragAndDropManager(): PlatformDragAndDropManager {
+            return object : PlatformDragAndDropManager {
+                override val modifier: Modifier
+                    get() = Modifier
+
+                override fun drag(
+                    transferData: DragAndDropTransferData,
+                    decorationSize: Size,
+                    drawDragDecoration: DrawScope.() -> Unit
+                ): Boolean {
+                    TODO("Drag&drop isn't implemented")
+                }
+
+                override fun registerNodeInterest(node: DragAndDropModifierNode) {
+                    TODO("Drag&drop isn't implemented")
+                }
+
+                override fun isInterestedNode(node: DragAndDropModifierNode): Boolean {
+                    TODO("Drag&drop isn't implemented")
+                }
+            }
+        }
     }
 
-    private val layer = ComposeLayer(
-        layer = SkiaLayer(),
-        platformContext = platformContext,
+    private val skiaLayer: SkiaLayer = SkiaLayer().apply {
+        renderDelegate = object : SkikoRenderDelegate {
+            override fun onRender(canvas: Canvas, width: Int, height: Int, nanoTime: Long) {
+                scene.render(canvas.asComposeCanvas(), nanoTime)
+            }
+        }
+    }
+
+    private val scene = CanvasLayersComposeScene(
+        coroutineContext = Dispatchers.Main,
+        composeSceneContext = object : ComposeSceneContext {
+            override val platformContext get() = this@ComposeWindow.platformContext
+        },
+        density = density,
+        invalidate = skiaLayer::needRedraw,
     )
+
+    private val layer = ComposeLayer(
+        layer = skiaLayer,
+        scene = scene
+    )
+
     private val systemThemeObserver = getSystemThemeObserver()
 
     override val lifecycle = LifecycleRegistry(this)
@@ -219,7 +277,7 @@ internal class ComposeWindow(
     }
 
     private fun processKeyboardEvent(keyboardEvent: KeyboardEvent) {
-        val processed = layer.onKeyboardEvent(keyboardEvent.toComposeEvent())
+        val processed = scene.sendKeyEvent(keyboardEvent.toComposeEvent())
         if (processed) keyboardEvent.preventDefault()
     }
 
@@ -233,46 +291,46 @@ internal class ComposeWindow(
                 offset = Offset(x = left.toFloat(), y = top.toFloat())
             }
 
-            layer.onTouchEvent(event, offset)
+            onTouchEvent(event, offset)
         }
 
         addTypedEvent<TouchEvent>("touchmove") { event ->
             event.preventDefault()
-            layer.onTouchEvent(event, offset)
+            onTouchEvent(event, offset)
         }
 
         addTypedEvent<TouchEvent>("touchend") { event ->
             event.preventDefault()
-            layer.onTouchEvent(event, offset)
+            onTouchEvent(event, offset)
         }
 
         addTypedEvent<TouchEvent>("touchcancel") { event ->
             event.preventDefault()
-            layer.onTouchEvent(event, offset)
+            onTouchEvent(event, offset)
         }
 
         addTypedEvent<MouseEvent>("mousedown") { event ->
-            layer.onMouseEvent(event)
+            onMouseEvent(event)
         }
 
         addTypedEvent<MouseEvent>("mouseup") { event ->
-            layer.onMouseEvent(event)
+            onMouseEvent(event)
         }
 
         addTypedEvent<MouseEvent>("mousemove") { event ->
-            layer.onMouseEvent(event)
+            onMouseEvent(event)
         }
 
         addTypedEvent<MouseEvent>("mouseenter") { event ->
-            layer.onMouseEvent(event)
+            onMouseEvent(event)
         }
 
         addTypedEvent<MouseEvent>("mouseleave") { event ->
-            layer.onMouseEvent(event)
+            onMouseEvent(event)
         }
 
         addTypedEvent<WheelEvent>("wheel") { event ->
-            layer.onWheelEvent(event)
+            onWheelEvent(event)
         }
 
         canvas.addEventListener("contextmenu", { event ->
@@ -302,7 +360,8 @@ internal class ComposeWindow(
 
         canvas.setAttribute("tabindex", "0")
 
-        layer.setDensity(density)
+        scene.density = density
+
         layer.setContent {
             CompositionLocalProvider(
                 LocalSystemTheme provides systemThemeObserver.currentSystemTheme.value,
@@ -345,21 +404,30 @@ internal class ComposeWindow(
 
     // TODO: need to call .dispose() on window close.
     fun dispose() {
+        check(!isDisposed)
         lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         viewModelStore.clear()
 
+        scene.close()
         layer.dispose()
+
         systemThemeObserver.dispose()
         state.dispose()
         // modern browsers supposed to garbage collect all events on the element disposed
         // but actually we never can be sure dom element was collected in first place
         canvasEvents.dispose()
+        isDisposed = true
     }
 
-    private fun ComposeLayer.onTouchEvent(
+    private fun onTouchEvent(
         event: TouchEvent,
         offset: Offset,
     ) {
+        val inputModeManager = scene.platformContext.inputModeManager
+        if (inputModeManager.inputMode != InputMode.Touch) {
+            inputModeManager.requestInputMode(InputMode.Touch)
+        }
+
         keyboardModeState = KeyboardModeState.Virtual
         val eventType = when (event.type) {
             "touchstart" -> PointerEventType.Press
@@ -382,14 +450,20 @@ internal class ComposeWindow(
                 pressure = touch.unsafeCast<ExtendedTouchEvent>().force.toFloat()
             )
         }
-        onTouchEvent(
+
+        scene.sendPointerEvent(
             eventType = eventType,
             pointers = pointers,
+            buttons = PointerButtons(),
+            keyboardModifiers = PointerKeyboardModifiers(),
+            scrollDelta = Offset.Zero,
             nativeEvent = event,
+            button = null
         )
+
     }
 
-    private fun ComposeLayer.onMouseEvent(
+    private fun onMouseEvent(
         event: MouseEvent,
     ) {
         keyboardModeState = KeyboardModeState.Hardware
@@ -401,7 +475,7 @@ internal class ComposeWindow(
             "mouseleave" -> PointerEventType.Exit
             else -> PointerEventType.Unknown
         }
-        onMouseEvent(
+        scene.sendPointerEvent(
             eventType = eventType,
             position = event.offset,
             buttons = event.composeButtons,
@@ -416,11 +490,11 @@ internal class ComposeWindow(
         )
     }
 
-    private fun ComposeLayer.onWheelEvent(
+    private fun onWheelEvent(
         event: WheelEvent,
     ) {
         keyboardModeState = KeyboardModeState.Hardware
-        onMouseEvent(
+        scene.sendPointerEvent(
             eventType = PointerEventType.Scroll,
             position = event.offset,
             scrollDelta = Offset(

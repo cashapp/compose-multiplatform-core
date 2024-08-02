@@ -23,7 +23,6 @@ import androidx.compose.ui.ComposeFeatureFlags
 import androidx.compose.ui.awt.AwtEventListener
 import androidx.compose.ui.awt.AwtEventListeners
 import androidx.compose.ui.awt.OnlyValidPrimaryMouseButtonFilter
-import androidx.compose.ui.awt.SwingInteropContainer
 import androidx.compose.ui.awt.isFocusGainedHandledBySwingPanel
 import androidx.compose.ui.awt.runOnEDTThread
 import androidx.compose.ui.focus.FocusDirection
@@ -40,6 +39,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.PointerKeyboardModifiers
 import androidx.compose.ui.input.pointer.PointerType
+import androidx.compose.ui.platform.AwtDragAndDropManager
 import androidx.compose.ui.platform.DelegateRootForTestListener
 import androidx.compose.ui.platform.DesktopTextInputService
 import androidx.compose.ui.platform.EmptyViewConfiguration
@@ -57,11 +57,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.SwingInteropContainer
 import androidx.compose.ui.window.WindowExceptionHandler
 import androidx.compose.ui.window.density
 import androidx.compose.ui.window.sizeInPx
 import java.awt.Component
-import java.awt.Container
 import java.awt.Cursor
 import java.awt.Dimension
 import java.awt.Point
@@ -83,6 +83,7 @@ import java.awt.event.MouseEvent
 import java.awt.event.MouseWheelEvent
 import java.awt.im.InputMethodRequests
 import javax.accessibility.Accessible
+import javax.swing.JComponent
 import javax.swing.SwingUtilities
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
@@ -104,7 +105,7 @@ import org.jetbrains.skiko.swing.SkiaSwingLayer
  * - for forcing refocus on input methods change
  */
 internal class ComposeSceneMediator(
-    private val container: Container,
+    private val container: JComponent,
     private val windowContext: PlatformWindowContext,
     private var exceptionHandler: WindowExceptionHandler?,
     eventListener: AwtEventListener? = null,
@@ -159,7 +160,7 @@ internal class ComposeSceneMediator(
      * native views/components to [container].
      */
     private val interopContainer = SwingInteropContainer(
-        container = container,
+        root = container,
         placeInteropAbove = !useInteropBlending || metalOrderHack
     )
 
@@ -687,6 +688,8 @@ internal class ComposeSceneMediator(
             get() = this@ComposeSceneMediator.rootForTestListener
         override val semanticsOwnerListener
             get() = this@ComposeSceneMediator.semanticsOwnerListener
+
+        override fun createDragAndDropManager() = AwtDragAndDropManager(container)
     }
 
     private inner class DesktopPlatformComponent : PlatformComponent {

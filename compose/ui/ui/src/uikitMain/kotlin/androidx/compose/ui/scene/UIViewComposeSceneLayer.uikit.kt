@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.interop.UIKitInteropContext
 import androidx.compose.ui.platform.PlatformContext
 import androidx.compose.ui.platform.PlatformWindowContext
 import androidx.compose.ui.skiko.RecordDrawRectRenderDecorator
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.asDpOffset
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.roundToIntRect
 import androidx.compose.ui.unit.toOffset
+import androidx.compose.ui.viewinterop.UIKitInteropContainer
 import androidx.compose.ui.window.ComposeContainer
 import androidx.compose.ui.window.FocusStack
 import androidx.compose.ui.window.ProvideContainerCompositionLocals
@@ -149,10 +149,14 @@ internal class UIViewComposeSceneLayer(
         composeContainer.attachLayer(this)
     }
 
-    private fun createSkikoUIView(interopContext: UIKitInteropContext, renderDelegate: SkikoRenderDelegate): RenderingUIView =
-        RenderingUIView(
-            interopContext = interopContext,
-            renderDelegate = recordDrawBounds(renderDelegate)
+    private fun createSkikoUIView(
+        interopContainer: UIKitInteropContainer,
+        renderDelegate: SkikoRenderDelegate
+    ) = RenderingUIView(
+            renderDelegate = recordDrawBounds(renderDelegate),
+            retrieveInteropTransaction = {
+                interopContainer.retrieveTransaction()
+            }
         ).apply {
             opaque = false
         }
@@ -162,13 +166,15 @@ internal class UIViewComposeSceneLayer(
         platformContext: PlatformContext,
         coroutineContext: CoroutineContext,
     ): ComposeScene =
-        SingleLayerComposeScene(
+        PlatformLayersComposeScene(
             density = initDensity, // We should use the local density already set for the current layer.
             layoutDirection = initLayoutDirection,
             coroutineContext = coroutineContext,
             composeSceneContext = composeContainer.createComposeSceneContext(platformContext),
             invalidate = invalidate,
         )
+
+    fun hasInvalidations() = mediator.hasInvalidations()
 
     override var density by mediator::density
     override var layoutDirection by mediator::layoutDirection

@@ -34,8 +34,7 @@ import kotlin.jvm.JvmOverloads
 /**
  * [IntList] is a [List]-like collection for [Int] values. It allows retrieving
  * the elements without boxing. [IntList] is always backed by a [MutableIntList],
- * its [MutableList]-like subclass. The purpose of this class is to avoid the performance
- * overhead of auto-boxing due to generics since [Collection] classes all operate on objects.
+ * its [MutableList]-like subclass.
  *
  * This implementation is not thread-safe: if multiple threads access this
  * container concurrently, and one or more threads modify the structure of
@@ -63,18 +62,6 @@ public sealed class IntList(initialCapacity: Int) {
     @get:androidx.annotation.IntRange(from = 0)
     public val size: Int
         get() = _size
-
-    /**
-     * The current backing [IntArray] for the contents of [IntList].
-     *
-     * Modifying this array may affect the contents of the [IntList]. The values are stored in
-     * indices 0 to [lastIndex], but any values after [lastIndex] can be any value.
-     *
-     * This should only be used for highly-optimized code that needs direct access to the backing
-     * array.
-     */
-    public val internalArray: IntArray
-        get() = content
 
     /**
      * Returns the last valid index in the [IntList]. This can be `-1` when the list is empty.
@@ -891,6 +878,7 @@ public class MutableIntList(
      * Sorts the [MutableIntList] elements in ascending order.
      */
     public fun sort() {
+        if (_size == 0) return // TODO: remove after fix https://youtrack.jetbrains.com/issue/KT-70005
         content.sort(fromIndex = 0, toIndex = _size)
     }
 
@@ -898,6 +886,7 @@ public class MutableIntList(
      * Sorts the [MutableIntList] elements in descending order.
      */
     public fun sortDescending() {
+        if (_size == 0) return // TODO: remove after fix https://youtrack.jetbrains.com/issue/KT-70005
         content.sortDescending(fromIndex = 0, toIndex = _size)
     }
 }

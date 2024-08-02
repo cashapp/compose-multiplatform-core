@@ -19,24 +19,28 @@ package androidx.compose.ui.window
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.interop.UIKitInteropContext
-import androidx.compose.ui.interop.UIKitInteropTransaction
+import androidx.compose.ui.viewinterop.UIKitInteropTransaction
 import kotlin.math.floor
 import kotlin.math.roundToLong
-import kotlinx.cinterop.*
+import kotlinx.cinterop.useContents
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skiko.SkikoRenderDelegate
-import platform.CoreGraphics.*
-import platform.Foundation.*
+import platform.CoreGraphics.CGFloat
+import platform.CoreGraphics.CGRectIsEmpty
+import platform.CoreGraphics.CGRectMake
+import platform.CoreGraphics.CGSizeMake
+import platform.Foundation.NSTimeInterval
 import platform.Metal.MTLCreateSystemDefaultDevice
 import platform.Metal.MTLDeviceProtocol
 import platform.Metal.MTLPixelFormatBGRA8Unorm
 import platform.QuartzCore.CAMetalLayer
-import platform.UIKit.*
+import platform.UIKit.UIColor
+import platform.UIKit.UIView
+import platform.UIKit.UIViewMeta
 
 internal class RenderingUIView(
-    private val interopContext: UIKitInteropContext,
     private val renderDelegate: SkikoRenderDelegate,
+    private val retrieveInteropTransaction: () -> UIKitInteropTransaction,
 ) : UIView(
     frame = CGRectMake(
         x = 0.0,
@@ -67,7 +71,7 @@ internal class RenderingUIView(
             }
 
             override fun retrieveInteropTransaction(): UIKitInteropTransaction =
-                interopContext.retrieve()
+                this@RenderingUIView.retrieveInteropTransaction()
         }
     )
 
