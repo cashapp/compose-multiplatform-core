@@ -318,11 +318,11 @@ class ThreePaneMotionTest {
 
         val delayedSpec =
             DelayedSpringSpec(
-                dampingRatio = 0.7f,
-                stiffness = 500f,
-                visibilityThreshold = 0.1f,
-                delayedRatio = delayedRatio,
-            )
+                    dampingRatio = 0.7f,
+                    stiffness = 500f,
+                    visibilityThreshold = 0.1f,
+                    delayedRatio = delayedRatio,
+                )
                 .vectorize(Float.VectorConverter)
 
         val originalDurationNanos = originalSpec.getDurationNanos()

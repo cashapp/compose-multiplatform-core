@@ -55,7 +55,7 @@ class ThreePaneScaffoldValueTest {
                 maxHorizontalPartitions = 1,
                 adaptStrategies = MockAdaptStrategies,
                 currentDestination =
-                ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null)
+                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null)
             )
         scaffoldState.assertState(ThreePaneScaffoldRole.Primary, PrimaryPaneAdaptedState)
         scaffoldState.assertState(ThreePaneScaffoldRole.Secondary, PaneAdaptedValue.Expanded)
@@ -69,10 +69,10 @@ class ThreePaneScaffoldValueTest {
                 maxHorizontalPartitions = 1,
                 adaptStrategies = MockAdaptStrategies,
                 destinationHistory =
-                listOf(
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null),
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null)
-                )
+                    listOf(
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null),
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null)
+                    )
             )
         scaffoldState.assertState(ThreePaneScaffoldRole.Primary, PrimaryPaneAdaptedState)
         scaffoldState.assertState(ThreePaneScaffoldRole.Secondary, PaneAdaptedValue.Expanded)
@@ -112,7 +112,7 @@ class ThreePaneScaffoldValueTest {
                 maxHorizontalPartitions = 2,
                 adaptStrategies = MockAdaptStrategies,
                 currentDestination =
-                ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null)
+                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null)
             )
         scaffoldState.assertState(ThreePaneScaffoldRole.Primary, PaneAdaptedValue.Expanded)
         scaffoldState.assertState(ThreePaneScaffoldRole.Secondary, SecondaryPaneAdaptedState)
@@ -126,10 +126,10 @@ class ThreePaneScaffoldValueTest {
                 maxHorizontalPartitions = 2,
                 adaptStrategies = MockAdaptStrategies,
                 destinationHistory =
-                listOf(
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null),
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null)
-                )
+                    listOf(
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null),
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null)
+                    )
             )
         scaffoldState.assertState(ThreePaneScaffoldRole.Primary, PrimaryPaneAdaptedState)
         scaffoldState.assertState(ThreePaneScaffoldRole.Secondary, PaneAdaptedValue.Expanded)
@@ -143,13 +143,13 @@ class ThreePaneScaffoldValueTest {
                 maxHorizontalPartitions = 2,
                 adaptStrategies = MockAdaptStrategies,
                 destinationHistory =
-                listOf(
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Primary, null),
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null),
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null),
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Primary, null),
-                    ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null)
-                )
+                    listOf(
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Primary, null),
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null),
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Secondary, null),
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Primary, null),
+                        ThreePaneScaffoldDestinationItem(ThreePaneScaffoldRole.Tertiary, null)
+                    )
             )
         scaffoldState.assertState(ThreePaneScaffoldRole.Primary, PaneAdaptedValue.Expanded)
         scaffoldState.assertState(ThreePaneScaffoldRole.Secondary, SecondaryPaneAdaptedState)
