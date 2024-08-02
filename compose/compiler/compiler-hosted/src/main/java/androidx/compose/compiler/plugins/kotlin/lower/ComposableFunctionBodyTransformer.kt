@@ -3788,6 +3788,10 @@ class ComposableFunctionBodyTransformer(
     override fun visitWhen(expression: IrWhen): IrExpression {
         if (!isInComposableScope) return super.visitWhen(expression)
 
+        val optimizeGroups =
+            FeatureFlag.OptimizeNonSkippingGroups.enabled &&
+                !currentFunctionScope.function.hasExplicitGroups
+
         // Composable calls in conditions are more expensive than composable calls in the different
         // result branches of the when clause. This is because if we have N branches of a when
         // clause, we will always execute exactly 1 result branch, but we will execute 0-N of the
@@ -3842,10 +3846,12 @@ class ComposableFunctionBodyTransformer(
                     resultScopes.add(resultScope)
 
                     // the first condition is always executed so if it has a composable call in it,
-                    // it doesn't necessitate a group
+                    // it doesn't necessitate a group. However, non-skipping group optimization is
+                    // enabled, we need a wrapping group if any conditions have a composable call.
                     needsWrappingGroup =
-                        needsWrappingGroup || (index != 0 && condScope.hasComposableCalls)
-                    if (resultScope.hasComposableCalls)
+                        needsWrappingGroup || ((index != 0) && condScope.hasComposableCalls)
+
+                    if (resultScope.hasComposableCalls && !it.result.isGroupBalanced())
                         resultsWithCalls++
 
                     transformed.branches.add(
@@ -3860,13 +3866,23 @@ class ComposableFunctionBodyTransformer(
             }
         }
 
+        // If we are optimizing the non-skipping functions we always need the
+        // same number of groups if any of the results have composable functions
+        // and it needs to be the same number even if only one branch requires a
+        // group.
+        val needsResultGroups = if (optimizeGroups) {
+            resultsWithCalls > 0
+        } else {
+            resultsWithCalls > 1 && !needsWrappingGroup
+        }
+
         // If we are putting groups around the result branches, we need to guarantee that exactly
         // one result branch is executed. We do this by adding an else branch if it there is not
         // one already. Note that we only need to do this if we aren't going to wrap the if
         // statement in a group entirely, which we will do if the conditions have calls in them.
         // NOTE: we might also be able to assume that the when is exhaustive if it has a non-unit
         // resulting type, since the type system should enforce that.
-        if (!hasElseBranch && resultsWithCalls > 1 && !needsWrappingGroup) {
+        if (!hasElseBranch && needsResultGroups) {
             condScopes.add(Scope.BranchScope())
             resultScopes.add(Scope.BranchScope())
             transformed.branches.add(
@@ -3893,7 +3909,7 @@ class ComposableFunctionBodyTransformer(
 
         forEachWith(transformed.branches, condScopes, resultScopes) { it, condScope, resultScope ->
             if (condScope.hasComposableCalls) {
-                if (needsWrappingGroup) {
+                if (needsWrappingGroup && !optimizeGroups) {
                     // Generate a group around the conditional block when it has a composable call
                     // in it and we are generating a group around when block.
                     it.condition = it.condition.asReplaceGroup(condScope)
@@ -3905,13 +3921,15 @@ class ComposableFunctionBodyTransformer(
                 }
             }
 
+            // if no wrapping group but more than we need branch groups, we have to have every
+            // result be a group so that we have a consistent number of groups during execution
             if (
-                // if no wrapping group but more than one result have calls, we have to have every
-                // result be a group so that we have a consistent number of groups during execution
-                (resultsWithCalls > 1 && !needsWrappingGroup) ||
+                needsResultGroups ||
                 // if we are wrapping the if with a group, then we only need to add a group when
-                // the block has composable calls
-                (needsWrappingGroup && resultScope.hasComposableCalls)
+                // the block has composable calls. The check of the feature flag check here is redundant
+                // as needsBranchGroups will be true if any result scope has composable calls but it
+                // is here redundantly so when this flag is removed this code will be updated.
+                !optimizeGroups && (needsWrappingGroup && resultScope.hasComposableCalls)
             ) {
                 it.result = it.result.asReplaceGroup(resultScope)
             }
@@ -3923,10 +3941,31 @@ class ComposableFunctionBodyTransformer(
             }
         }
 
+        if (
+            optimizeGroups && needsResultGroups && (
+                transformed.origin == IrStatementOrigin.ANDAND ||
+                    transformed.origin == IrStatementOrigin.OROR
+            )
+        ) {
+            // When a IrWhen has a ANDAND or OROR origin it is required they also have a specific shape such as for ANDAND requires a
+            // `true -> false` clause at the end.  As we violate this by adding a wrapping group around all results, this origin is removed
+            // down-stream lowerings will no longer special case this IrWhen.
+            transformed.origin = IrStatementOrigin.WHEN
+        }
+
         return when {
-            resultsWithCalls == 1 || needsWrappingGroup -> transformed.asCoalescableGroup(whenScope)
+            ((!optimizeGroups && resultsWithCalls == 1) || needsWrappingGroup) ->
+                transformed.asCoalescableGroup(whenScope)
             else -> transformed
         }
+    }
+
+    // Returns true if the number of groups added are required to be fix and a group is inserted  to balance the groups if they are not.
+    // Currently this is only guaranteed for IrWhen nodes when the group non-skipping group optimization is enabled. This avoids
+    // inserting a redundant group to balance an already balanced set of groups.
+    private fun IrExpression.isGroupBalanced(): Boolean = when (this) {
+        is IrWhen -> FeatureFlag.OptimizeNonSkippingGroups.enabled
+        else -> false
     }
 
     sealed class Scope(val name: String) {

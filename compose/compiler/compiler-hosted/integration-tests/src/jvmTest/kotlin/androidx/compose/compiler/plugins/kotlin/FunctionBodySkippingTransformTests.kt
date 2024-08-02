@@ -1313,6 +1313,13 @@ class FunctionBodySkippingTransformTestsNoSource(
     override fun CompilerConfiguration.updateConfiguration() {
         put(ComposeConfiguration.SOURCE_INFORMATION_ENABLED_KEY, false)
         put(ComposeConfiguration.TRACE_MARKERS_ENABLED_KEY, false)
+        put(
+            ComposeConfiguration.FEATURE_FLAGS,
+            listOf(
+                FeatureFlag.StrongSkipping.featureName,
+                FeatureFlag.OptimizeNonSkippingGroups.featureName,
+            )
+        )
     }
 
     @Test
@@ -1454,6 +1461,53 @@ class FunctionBodySkippingTransformTestsNoSource(
 
             @Composable
             fun Text(value: String) {}
+        """
+    )
+
+    @Test
+    fun testIfStatementGroups() = verifyGoldenComposeIrTransform(
+        source = """
+            import androidx.compose.runtime.*
+
+            @Composable
+            fun Test(level: Int) {
+                Wrap {
+                    if (level > 0) {
+                        used(remember { "Before" })
+                        Wrap {
+                            used(remember { "Middle" })
+                        }
+                        used(remember { "End" })
+                    }
+                }
+            }
+        """,
+        """
+            import androidx.compose.runtime.*
+
+            @Composable
+            fun Wrap(content: @Composable () -> Unit) = content()
+
+            fun used(value: Any) { }
+        """
+    )
+
+    @Test
+    fun ensureNoGroupsAreAddedToAnExplicitGroupsComposable() = verifyGoldenComposeIrTransform(
+        source = """
+            import androidx.compose.runtime.*
+
+            @ExplicitGroupsComposable
+            @Composable
+            inline fun Test(active: Boolean, content: @Composable () -> Unit) {
+                currentComposer.startReusableGroup(1, null)
+                if (active) {
+                    content()
+                } else {
+                    currentComposer.deactivateToEndGroup(false)
+                }
+                currentComposer.endReusableGroup()
+            }
         """
     )
 }
