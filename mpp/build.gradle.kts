@@ -194,6 +194,7 @@ tasks.register("testUIKit") {
     val uikitTestSubtaskName = "uikit$suffix"
     val instrumentedTestSubtaskName = "uikitInstrumented$suffix"
 
+    dependsOn(":compose:runtime:runtime:$uikitTestSubtaskName")
     dependsOn(":compose:ui:ui-text:$uikitTestSubtaskName")
     dependsOn(":compose:ui:ui:$uikitTestSubtaskName")
     dependsOn(":compose:ui:ui:$instrumentedTestSubtaskName")
