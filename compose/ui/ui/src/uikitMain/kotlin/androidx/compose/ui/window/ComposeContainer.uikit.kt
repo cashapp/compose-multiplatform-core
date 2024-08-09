@@ -327,7 +327,7 @@ internal class ComposeContainer(
                 interopContainer.retrieveTransaction()
             }
         ).apply {
-            opaque = configuration.opaque
+            canBeCompletelyOpaque = configuration.opaque
         }
 
     @OptIn(ExperimentalComposeApi::class)

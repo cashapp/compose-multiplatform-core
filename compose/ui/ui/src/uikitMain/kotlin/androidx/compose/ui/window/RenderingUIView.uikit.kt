@@ -75,11 +75,10 @@ internal class RenderingUIView(
         }
     )
 
-    override fun setOpaque(opaque: Boolean) {
-        super.setOpaque(opaque)
-
-        redrawer.opaque = opaque
-    }
+    /**
+     * @see MetalRedrawer.canBeCompletelyOpaque
+     */
+    var canBeCompletelyOpaque by redrawer::canBeCompletelyOpaque
 
     init {
         userInteractionEnabled = false

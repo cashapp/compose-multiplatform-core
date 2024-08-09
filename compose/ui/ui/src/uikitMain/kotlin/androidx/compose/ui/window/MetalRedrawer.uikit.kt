@@ -186,7 +186,19 @@ internal class MetalRedrawer(
             displayLinkConditions.needsToBeProactive = value
         }
 
-    var opaque: Boolean = true
+    /**
+     * Indicates that the view can potentially be opaque due to no hard requirements
+     * for transparency.
+     * If true, renderer will use opaque rendering optimizations when it's possible.
+     * If not, [metalLayer] will always be transparent.
+     *
+     * [metalLayer] transparency implies that iOS will always perform alpha
+     * blending when compositing the rendered content, even if the content is completely opaque.
+     *
+     * Assigning this property will trigger reevaluation of [metalLayer] transparency.
+     * It can still be transparent in case interop views are present.
+     */
+    var canBeCompletelyOpaque: Boolean = true
         set(value) {
             field = value
 
@@ -207,7 +219,7 @@ internal class MetalRedrawer(
         }
 
     private fun updateLayerOpacity() {
-        metalLayer.setOpaque(!isInteropActive && opaque)
+        metalLayer.setOpaque(!isInteropActive && canBeCompletelyOpaque)
     }
 
     /**
@@ -311,7 +323,7 @@ internal class MetalRedrawer(
                         height.toFloat()
                     )
                 ).also { canvas ->
-                    canvas.clear(if (metalLayer.opaque) Color.WHITE else Color.TRANSPARENT)
+                    canvas.clear(if (metalLayer.isOpaque()) Color.WHITE else Color.TRANSPARENT)
                     callbacks.render(canvas, lastRenderTimestamp)
                 }
 
