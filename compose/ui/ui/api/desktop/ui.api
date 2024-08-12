@@ -3517,6 +3517,7 @@ public final class androidx/compose/ui/scene/CanvasLayersComposeScene_skikoKt {
 }
 
 public abstract interface class androidx/compose/ui/scene/ComposeScene {
+	public abstract fun activeDragAndDropManager ()Landroidx/compose/ui/platform/PlatformDragAndDropManager;
 	public abstract fun calculateContentSize-YbymL2g ()J
 	public abstract fun close ()V
 	public abstract fun createLayer (Landroidx/compose/ui/unit/Density;Landroidx/compose/ui/unit/LayoutDirection;ZLandroidx/compose/runtime/CompositionContext;)Landroidx/compose/ui/scene/ComposeSceneLayer;
