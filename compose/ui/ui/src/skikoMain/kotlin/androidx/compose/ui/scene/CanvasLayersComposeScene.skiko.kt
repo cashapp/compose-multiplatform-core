@@ -119,6 +119,7 @@ private class CanvasLayersComposeSceneImpl(
         platformContext = composeSceneContext.platformContext,
         snapshotInvalidationTracker = snapshotInvalidationTracker,
         inputHandler = inputHandler,
+        activeRootNodeOwner = ::topFocusableLayerOwner
     )
 
     override var density: Density = density
@@ -447,6 +448,14 @@ private class CanvasLayersComposeSceneImpl(
         }
     }
 
+    private fun topFocusableLayerOwner(): RootNodeOwner {
+        layers.fastForEachReversed {
+            if (it.focusable)
+                return it.owner
+        }
+        return mainOwner
+    }
+
     private inner class AttachedComposeSceneLayer(
         density: Density,
         layoutDirection: LayoutDirection,
@@ -471,6 +480,7 @@ private class CanvasLayersComposeSceneImpl(
             },
             snapshotInvalidationTracker = snapshotInvalidationTracker,
             inputHandler = inputHandler,
+            activeRootNodeOwner = ::topFocusableLayerOwner
         )
         private var composition: Composition? = null
         private var outsidePointerCallback: ((

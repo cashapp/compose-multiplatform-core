@@ -62,6 +62,7 @@ import androidx.compose.ui.platform.DefaultHapticFeedback
 import androidx.compose.ui.platform.DelegatingSoftwareKeyboardController
 import androidx.compose.ui.platform.PlatformClipboardManager
 import androidx.compose.ui.platform.PlatformContext
+import androidx.compose.ui.platform.PlatformDragAndDropManager
 import androidx.compose.ui.platform.PlatformRootForTest
 import androidx.compose.ui.platform.PlatformTextInputSessionScope
 import androidx.compose.ui.platform.RenderNodeLayer
@@ -106,6 +107,7 @@ internal class RootNodeOwner(
     val platformContext: PlatformContext,
     private val snapshotInvalidationTracker: SnapshotInvalidationTracker,
     private val inputHandler: ComposeSceneInputHandler,
+    private val activeRootNodeOwner: () -> RootNodeOwner
 ) {
     val focusOwner: FocusOwner = FocusOwnerImpl(
         onRequestFocusForOwner = { _, _ ->
@@ -123,8 +125,11 @@ internal class RootNodeOwner(
             platformContext.parentFocusManager.clearFocus(true)
         },
     )
-    private val dragAndDropManager: DragAndDropManager =
-        platformContext.createDragAndDropManager().asDragAndDropManager()
+    val dragAndDropManager: PlatformDragAndDropManager = platformContext.createDragAndDropManager(
+        activeDragAndDropManager = {
+            activeRootNodeOwner().dragAndDropManager
+        }
+    )
     private val rootSemanticsNode = EmptySemanticsModifier()
 
     private val rootModifier = EmptySemanticsElement(rootSemanticsNode)
@@ -330,7 +335,8 @@ internal class RootNodeOwner(
         ): Nothing {
             awaitCancellation()
         }
-        override val dragAndDropManager: DragAndDropManager = this@RootNodeOwner.dragAndDropManager
+        override val dragAndDropManager: DragAndDropManager =
+            this@RootNodeOwner.dragAndDropManager.asDragAndDropManager()
         override val pointerIconService = PointerIconServiceImpl()
         override val focusOwner get() = this@RootNodeOwner.focusOwner
         override val windowInfo get() = platformContext.windowInfo

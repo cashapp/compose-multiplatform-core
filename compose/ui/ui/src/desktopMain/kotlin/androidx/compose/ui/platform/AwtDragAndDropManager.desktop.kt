@@ -20,6 +20,7 @@ import androidx.collection.ArraySet
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draganddrop.AwtDragAndDropTransferable
 import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropManager
 import androidx.compose.ui.draganddrop.DragAndDropModifierNode
 import androidx.compose.ui.draganddrop.DragAndDropNode
 import androidx.compose.ui.draganddrop.DragAndDropTransferAction
@@ -27,7 +28,6 @@ import androidx.compose.ui.draganddrop.DragAndDropTransferAction.Companion.Copy
 import androidx.compose.ui.draganddrop.DragAndDropTransferAction.Companion.Link
 import androidx.compose.ui.draganddrop.DragAndDropTransferAction.Companion.Move
 import androidx.compose.ui.draganddrop.DragAndDropTransferData
-import androidx.compose.ui.draganddrop.DragAndDropManager
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Canvas
@@ -85,14 +85,13 @@ internal fun DragAndDropTransferAction.Companion.fromAwtAction(
  * Implements [PlatformDragAndDropManager] via the AWT drag-and-drop system.
  */
 internal class AwtDragAndDropManager(
-    private val rootContainer: JComponent
+    private val rootContainer: JComponent,
+    private val activeDragAndDropManager: () -> PlatformDragAndDropManager
 ): PlatformDragAndDropManager {
 
     private val rootDragAndDropNode = DragAndDropNode { null }
 
-    private val transferHandler = ComposeTransferHandler()
-
-    private val dropTarget = ComposeDropTarget()
+    private var transferHandler: ComposeTransferHandler? = null
 
     private val interestedNodes = ArraySet<DragAndDropModifierNode>()
 
@@ -106,8 +105,17 @@ internal class AwtDragAndDropManager(
         get() = Modifier
             .then(DragAndDropModifier(rootDragAndDropNode))
             .onPlaced {
-                rootContainer.transferHandler = transferHandler
-                rootContainer.dropTarget = dropTarget
+                var transferHandler = rootContainer.transferHandler as? ComposeTransferHandler
+                if (transferHandler == null) {
+                    transferHandler = ComposeTransferHandler(rootContainer)
+                    rootContainer.transferHandler = transferHandler
+                }
+                this.transferHandler = transferHandler
+
+                if (rootContainer.dropTarget !is ComposeDropTarget) {
+                    rootContainer.dropTarget =
+                        ComposeDropTarget(rootContainer, activeDragAndDropManager)
+                }
             }
 
     private fun Point.toOffset(): Offset {
@@ -129,7 +137,7 @@ internal class AwtDragAndDropManager(
         val density = this@AwtDragAndDropManager.density
         val layoutDirection = layoutDirectionFor(rootContainer)
 
-        transferHandler.startOutgoingTransfer(
+        transferHandler?.startOutgoingTransfer(
             transferData = transferData,
             dragImage = renderDragImage(
                 size = decorationSize,
@@ -174,140 +182,193 @@ internal class AwtDragAndDropManager(
         )
     }
 
-    private inner class ComposeTransferHandler : TransferHandler() {
+    /**
+     * Receives and processes events from the [ComposeDropTarget] installed in the root component.
+     */
+    val dropTargetListener = object : DropTargetListener {
+        override fun dragEnter(dtde: DropTargetDragEvent) {
+            val event = DragAndDropEvent(dtde)
 
-        private var outgoingTransfer: OutgoingTransfer? = null
-
-        fun startOutgoingTransfer(
-            transferData: DragAndDropTransferData,
-            dragImage: Image,
-            dragDecorationOffset: Offset,
-        ) {
-            outgoingTransfer = OutgoingTransfer(
-                transferData = transferData,
-                dragImage = dragImage,
-                dragImageOffset = PlatformAdaptations.dragImageOffset(dragDecorationOffset, scale)
-            )
-
-            val rootContainerLocation = rootContainer.locationOnScreen
-            val mouseLocation = MouseInfo.getPointerInfo().location?.let {
-                IntOffset(
-                    x = it.x - rootContainerLocation.x,
-                    y = it.y - rootContainerLocation.y
-                )
-            } ?: rootContainerLocation.let { IntOffset(it.x, it.y) }
-            transferHandler.exportAsDrag(
-                rootContainer,
-                MouseEvent(
-                    rootContainer,
-                    MouseEvent.MOUSE_DRAGGED,
-                    System.currentTimeMillis(),
-                    0,
-                    mouseLocation.x,
-                    mouseLocation.y,
-                    0,
-                    false
-                ),
-                // This seems to be ignored, and the initial action is MOVE regardless
-                DnDConstants.ACTION_MOVE
-            )
+            // There's no drag-start event in AWT, so start in dragEnter, and stop in dragExit
+            val accepted = rootDragAndDropNode.acceptDragAndDropTransfer(event)
+            interestedNodes.forEach { it.onStarted(event) }
+            rootDragAndDropNode.onEntered(event)
+            if (!accepted) {
+                dtde.rejectDrag()
+            }
         }
 
-        override fun createTransferable(c: JComponent?): Transferable? {
-            return (outgoingTransfer?.transferData?.transferable as? AwtDragAndDropTransferable)
-                ?.toAwtTransferable()
+        override fun dragExit(dte: DropTargetEvent) {
+            val event = DragAndDropEvent(dte)
+            rootDragAndDropNode.onExited(event)
+            endDrag(event)
         }
 
-        override fun getSourceActions(c: JComponent?): Int {
-            val actions = outgoingTransfer?.transferData?.supportedActions ?: emptyList()
-            return actions.fold(
-                initial = NONE,
-                operation = { acc, action -> acc or action.awtAction },
-            )
+        override fun dragOver(dtde: DropTargetDragEvent) {
+            rootDragAndDropNode.onMoved(DragAndDropEvent(dtde))
         }
 
-        override fun getDragImage() = outgoingTransfer?.dragImage
-
-        override fun getDragImageOffset() = outgoingTransfer?.dragImageOffset
-
-        override fun exportDone(source: JComponent?, data: Transferable?, action: Int) {
-            super.exportDone(source, data, action)
-
-            val transferAction = DragAndDropTransferAction.fromAwtAction(action)
-            outgoingTransfer?.transferData?.onTransferCompleted?.invoke(transferAction)
-            outgoingTransfer = null
+        override fun dropActionChanged(dtde: DropTargetDragEvent) {
+            rootDragAndDropNode.onChanged(DragAndDropEvent(dtde))
         }
+
+        override fun drop(dtde: DropTargetDropEvent) {
+            val event = DragAndDropEvent(dtde)
+            dtde.acceptDrop(dtde.dropAction)
+            dtde.dropComplete(rootDragAndDropNode.onDrop(event))
+            endDrag(event)
+        }
+
+        private fun endDrag(event: DragAndDropEvent) {
+            rootDragAndDropNode.onEnded(event)
+            interestedNodes.clear()
+        }
+
+        private fun DragAndDropEvent(dragEvent: DropTargetDragEvent) = DragAndDropEvent(
+            nativeEvent = dragEvent,
+            action = DragAndDropTransferAction.fromAwtAction(dragEvent.dropAction),
+            positionInRootImpl = dragEvent.location.toOffset()
+        )
+
+        private fun DragAndDropEvent(dropEvent: DropTargetDropEvent) = DragAndDropEvent(
+            nativeEvent = dropEvent,
+            action = DragAndDropTransferAction.fromAwtAction(dropEvent.dropAction),
+            positionInRootImpl = dropEvent.location.toOffset()
+        )
+
+        private fun DragAndDropEvent(dropEvent: DropTargetEvent) = DragAndDropEvent(
+            nativeEvent = dropEvent,
+            action = null,
+            positionInRootImpl = Offset.Zero
+        )
     }
 
-    private class OutgoingTransfer(
-        val transferData: DragAndDropTransferData,
-        val dragImage: Image,
-        val dragImageOffset: Point
-    )
+}
 
-    private inner class ComposeDropTarget : DropTarget(
-        rootContainer,
-        DnDConstants.ACTION_MOVE or DnDConstants.ACTION_COPY or DnDConstants.ACTION_LINK,
-        object : DropTargetListener {
-            override fun dragEnter(dtde: DropTargetDragEvent) {
-                val event = DragAndDropEvent(dtde)
+/**
+ * The AWT [TransferHandler] we install in the root container in order to implement drag-source
+ * functionality.
+ *
+ * Note that one instance may be shared between several [AwtDragAndDropManager]s, if there are
+ * several compositions attached to the same [rootContainer]
+ */
+private class ComposeTransferHandler(val rootContainer: JComponent) : TransferHandler() {
 
-                // There's no drag-start event in AWT, so start in dragEnter, and stop in dragExit
-                val accepted = rootDragAndDropNode.acceptDragAndDropTransfer(event)
-                interestedNodes.forEach { it.onStarted(event) }
-                rootDragAndDropNode.onEntered(event)
-                if (!accepted) {
-                    dtde.rejectDrag()
-                }
-            }
+    private val scale: Float
+        get() = rootContainer.density.density
 
-            override fun dragExit(dte: DropTargetEvent) {
-                val event = DragAndDropEvent(dte)
-                rootDragAndDropNode.onExited(event)
-                endDrag(event)
-            }
+    private var outgoingTransfer: OutgoingTransfer? = null
 
-            override fun dragOver(dtde: DropTargetDragEvent) {
-                rootDragAndDropNode.onMoved(DragAndDropEvent(dtde))
-            }
+    fun startOutgoingTransfer(
+        transferData: DragAndDropTransferData,
+        dragImage: Image,
+        dragDecorationOffset: Offset,
+    ) {
+        outgoingTransfer = OutgoingTransfer(
+            transferData = transferData,
+            dragImage = dragImage,
+            dragImageOffset = PlatformAdaptations.dragImageOffset(dragDecorationOffset, scale)
+        )
 
-            override fun dropActionChanged(dtde: DropTargetDragEvent) {
-                rootDragAndDropNode.onChanged(DragAndDropEvent(dtde))
-            }
-
-            override fun drop(dtde: DropTargetDropEvent) {
-                val event = DragAndDropEvent(dtde)
-                dtde.acceptDrop(dtde.dropAction)
-                dtde.dropComplete(rootDragAndDropNode.onDrop(event))
-                endDrag(event)
-            }
-
-            private fun endDrag(event: DragAndDropEvent) {
-                rootDragAndDropNode.onEnded(event)
-                interestedNodes.clear()
-            }
-
-            private fun DragAndDropEvent(dragEvent: DropTargetDragEvent) = DragAndDropEvent(
-                nativeEvent = dragEvent,
-                action = DragAndDropTransferAction.fromAwtAction(dragEvent.dropAction),
-                positionInRootImpl = dragEvent.location.toOffset()
+        val rootContainerLocation = rootContainer.locationOnScreen
+        val mouseLocation = MouseInfo.getPointerInfo().location?.let {
+            IntOffset(
+                x = it.x - rootContainerLocation.x,
+                y = it.y - rootContainerLocation.y
             )
+        } ?: rootContainerLocation.let { IntOffset(it.x, it.y) }
+        exportAsDrag(
+            rootContainer,
+            MouseEvent(
+                rootContainer,
+                MouseEvent.MOUSE_DRAGGED,
+                System.currentTimeMillis(),
+                0,
+                mouseLocation.x,
+                mouseLocation.y,
+                0,
+                false
+            ),
+            // This seems to be ignored, and the initial action is MOVE regardless
+            DnDConstants.ACTION_MOVE
+        )
+    }
 
-            private fun DragAndDropEvent(dropEvent: DropTargetDropEvent) = DragAndDropEvent(
-                nativeEvent = dropEvent,
-                action = DragAndDropTransferAction.fromAwtAction(dropEvent.dropAction),
-                positionInRootImpl = dropEvent.location.toOffset()
-            )
+    override fun createTransferable(c: JComponent?): Transferable? {
+        return (outgoingTransfer?.transferData?.transferable as? AwtDragAndDropTransferable)
+            ?.toAwtTransferable()
+    }
 
-            private fun DragAndDropEvent(dropEvent: DropTargetEvent) = DragAndDropEvent(
-                nativeEvent = dropEvent,
-                action = null,
-                positionInRootImpl = Offset.Zero
-            )
-        },
-        true
-    )
+    override fun getSourceActions(c: JComponent?): Int {
+        val actions = outgoingTransfer?.transferData?.supportedActions ?: emptyList()
+        return actions.fold(
+            initial = NONE,
+            operation = { acc, action -> acc or action.awtAction },
+        )
+    }
 
+    override fun getDragImage() = outgoingTransfer?.dragImage
+
+    override fun getDragImageOffset() = outgoingTransfer?.dragImageOffset
+
+    override fun exportDone(source: JComponent?, data: Transferable?, action: Int) {
+        super.exportDone(source, data, action)
+
+        val transferAction = DragAndDropTransferAction.fromAwtAction(action)
+        outgoingTransfer?.transferData?.onTransferCompleted?.invoke(transferAction)
+        outgoingTransfer = null
+    }
+}
+
+private class OutgoingTransfer(
+    val transferData: DragAndDropTransferData,
+    val dragImage: Image,
+    val dragImageOffset: Point
+)
+
+/**
+ * The AWT [DropTarget] we install in the root container in order to implement drop-target
+ * functionality.
+ *
+ * Note that one instance may be shared between several [AwtDragAndDropManager]s, if there are
+ * several compositions attached to the same root container. It forwards each [DropTargetEvent] it
+ * receives to the appropriate [AwtDragAndDropManager.dropTargetListener].
+ */
+private class ComposeDropTarget(
+    rootContainer: JComponent,
+    private val activeDragAndDropManager: () -> PlatformDragAndDropManager
+) : DropTarget(
+    rootContainer,
+    DnDConstants.ACTION_MOVE or DnDConstants.ACTION_COPY or DnDConstants.ACTION_LINK,
+    null,
+    true
+) {
+
+    /**
+     * Returns the "active" [AwtDragAndDropManager] - the one to which events should be sent.
+     */
+    private fun activeDropTargetListener(): DropTargetListener? =
+        (activeDragAndDropManager() as? AwtDragAndDropManager)?.dropTargetListener
+
+    override fun dragEnter(dtde: DropTargetDragEvent) {
+        activeDropTargetListener()?.dragEnter(dtde)
+    }
+
+    override fun dragOver(dtde: DropTargetDragEvent) {
+        activeDropTargetListener()?.dragOver(dtde)
+    }
+
+    override fun dropActionChanged(dtde: DropTargetDragEvent) {
+        activeDropTargetListener()?.dropActionChanged(dtde)
+    }
+
+    override fun dragExit(dte: DropTargetEvent) {
+        activeDropTargetListener()?.dragExit(dte)
+    }
+
+    override fun drop(dtde: DropTargetDropEvent) {
+        activeDropTargetListener()?.drop(dtde)
+    }
 }
 
 private class DragAndDropModifier(
@@ -391,4 +452,5 @@ private interface PlatformAdaptations {
         else -> Other
     }
 }
+
 

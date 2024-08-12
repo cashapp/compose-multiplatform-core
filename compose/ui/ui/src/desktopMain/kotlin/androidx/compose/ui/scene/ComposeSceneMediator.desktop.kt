@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.DesktopTextInputService
 import androidx.compose.ui.platform.EmptyViewConfiguration
 import androidx.compose.ui.platform.PlatformComponent
 import androidx.compose.ui.platform.PlatformContext
+import androidx.compose.ui.platform.PlatformDragAndDropManager
 import androidx.compose.ui.platform.PlatformWindowContext
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.platform.WindowInfo
@@ -689,7 +690,12 @@ internal class ComposeSceneMediator(
         override val semanticsOwnerListener
             get() = this@ComposeSceneMediator.semanticsOwnerListener
 
-        override fun createDragAndDropManager() = AwtDragAndDropManager(container)
+        override fun createDragAndDropManager(
+            activeDragAndDropManager: () -> PlatformDragAndDropManager
+        ) = AwtDragAndDropManager(
+            rootContainer = container,
+            activeDragAndDropManager = activeDragAndDropManager,
+        )
     }
 
     private inner class DesktopPlatformComponent : PlatformComponent {
