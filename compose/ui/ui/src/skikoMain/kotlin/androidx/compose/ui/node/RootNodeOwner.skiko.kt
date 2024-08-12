@@ -107,7 +107,6 @@ internal class RootNodeOwner(
     val platformContext: PlatformContext,
     private val snapshotInvalidationTracker: SnapshotInvalidationTracker,
     private val inputHandler: ComposeSceneInputHandler,
-    private val activeRootNodeOwner: () -> RootNodeOwner
 ) {
     val focusOwner: FocusOwner = FocusOwnerImpl(
         onRequestFocusForOwner = { _, _ ->
@@ -125,11 +124,7 @@ internal class RootNodeOwner(
             platformContext.parentFocusManager.clearFocus(true)
         },
     )
-    val dragAndDropManager: PlatformDragAndDropManager = platformContext.createDragAndDropManager(
-        activeDragAndDropManager = {
-            activeRootNodeOwner().dragAndDropManager
-        }
-    )
+    val dragAndDropManager: PlatformDragAndDropManager = platformContext.createDragAndDropManager()
     private val rootSemanticsNode = EmptySemanticsModifier()
 
     private val rootModifier = EmptySemanticsElement(rootSemanticsNode)

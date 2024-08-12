@@ -115,9 +115,7 @@ interface PlatformContext {
     val parentFocusManager: FocusManager get() = EmptyFocusManager
     fun requestFocus(): Boolean = true
 
-    fun createDragAndDropManager(
-        activeDragAndDropManager: () -> PlatformDragAndDropManager
-    ): PlatformDragAndDropManager = EmptyDragAndDropManager
+    fun createDragAndDropManager(): PlatformDragAndDropManager = EmptyDragAndDropManager
 
     /**
      * The listener to track [RootForTest]s.

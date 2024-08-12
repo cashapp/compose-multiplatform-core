@@ -99,7 +99,6 @@ private class PlatformLayersComposeSceneImpl(
             platformContext = composeSceneContext.platformContext,
             snapshotInvalidationTracker = snapshotInvalidationTracker,
             inputHandler = inputHandler,
-            activeRootNodeOwner = { mainOwner }
         )
     }
 
@@ -130,6 +129,8 @@ private class PlatformLayersComposeSceneImpl(
     override val focusManager: ComposeSceneFocusManager = ComposeSceneFocusManager(
         focusOwner = { mainOwner.focusOwner }
     )
+
+    override fun activeDragAndDropManager() = mainOwner.dragAndDropManager
 
     init {
         onOwnerAppended(mainOwner)

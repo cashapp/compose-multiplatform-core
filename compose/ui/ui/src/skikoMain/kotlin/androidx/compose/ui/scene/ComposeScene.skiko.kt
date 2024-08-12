@@ -39,6 +39,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.node.LayoutNode
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.PlatformContext
+import androidx.compose.ui.platform.PlatformDragAndDropManager
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -116,6 +117,11 @@ interface ComposeScene {
      * @see FocusManager
      */
     val focusManager: ComposeSceneFocusManager
+
+    /**
+     * Returns the currently active [PlatformDragAndDropManager].
+     */
+    fun activeDragAndDropManager(): PlatformDragAndDropManager
 
     /**
      * Close all resources and subscriptions. Not calling this method when [ComposeScene] is no
