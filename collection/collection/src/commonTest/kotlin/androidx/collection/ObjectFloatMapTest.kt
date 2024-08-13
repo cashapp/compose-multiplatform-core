@@ -601,7 +601,7 @@ internal class ObjectFloatTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableObjectFloatMap<String?>()
         map["Hello"] = 1f
         map[null] = 2f

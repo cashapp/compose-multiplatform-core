@@ -585,7 +585,7 @@ internal class LongIntMapTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableLongIntMap()
         map[1L] = 1
 

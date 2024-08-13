@@ -585,7 +585,7 @@ internal class IntIntMapTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableIntIntMap()
         map[1] = 1
 

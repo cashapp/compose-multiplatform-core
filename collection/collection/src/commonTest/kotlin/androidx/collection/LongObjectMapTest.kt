@@ -622,7 +622,7 @@ internal class LongObjectMapTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableLongObjectMap<String?>()
         map[1L] = "World"
         map[2L] = null
