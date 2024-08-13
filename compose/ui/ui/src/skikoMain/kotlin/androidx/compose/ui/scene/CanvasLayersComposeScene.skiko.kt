@@ -152,11 +152,7 @@ private class CanvasLayersComposeSceneImpl(
     )
 
     override fun activeDragAndDropManager(): PlatformDragAndDropManager {
-        layers.fastForEachReversed {
-            if (it.focusable)
-                return it.owner.dragAndDropManager
-        }
-        return mainOwner.dragAndDropManager
+        return focusedOwner.dragAndDropManager
     }
 
     private val layers = mutableListOf<AttachedComposeSceneLayer>()
