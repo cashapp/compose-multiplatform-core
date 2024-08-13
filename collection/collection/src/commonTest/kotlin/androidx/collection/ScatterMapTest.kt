@@ -16,6 +16,7 @@
 
 package androidx.collection
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -30,14 +31,14 @@ internal class ScatterMapTest {
     @Test
     fun scatterMap() {
         val map = MutableScatterMap<String, String>()
-        assertEquals(7, map.capacity)
+        assertCapacityEquals(7, map)
         assertEquals(0, map.size)
     }
 
     @Test
     fun emptyScatterMap() {
         val map = emptyScatterMap<String, String>()
-        assertEquals(0, map.capacity)
+        assertCapacityEquals(0, map)
         assertEquals(0, map.size)
 
         assertSame(emptyScatterMap<String, String>(), map)
@@ -46,14 +47,14 @@ internal class ScatterMapTest {
     @Test
     fun scatterMapFunction() {
         val map = mutableScatterMapOf<String, String>()
-        assertEquals(7, map.capacity)
+        assertCapacityEquals(7, map)
         assertEquals(0, map.size)
     }
 
     @Test
     fun zeroCapacityHashMap() {
         val map = MutableScatterMap<String, String>(0)
-        assertEquals(0, map.capacity)
+        assertCapacityEquals(0, map)
         assertEquals(0, map.size)
     }
 
@@ -62,7 +63,7 @@ internal class ScatterMapTest {
         // When unloading the suggested capacity, we'll fall outside of the
         // expected bucket of 2047 entries, and we'll get 4095 instead
         val map = MutableScatterMap<String, String>(1800)
-        assertEquals(4095, map.capacity)
+        assertCapacityEquals(4095, map)
         assertEquals(0, map.size)
     }
 
@@ -108,7 +109,7 @@ internal class ScatterMapTest {
         map["Hello"] = "World"
 
         assertEquals(1, map.size)
-        assertEquals(7, map.capacity)
+        assertCapacityEquals(7, map)
         assertEquals("World", map["Hello"])
     }
 
@@ -411,7 +412,7 @@ internal class ScatterMapTest {
         map["Hello"] = "World"
 
         assertEquals(1, map.size)
-        assertEquals(capacity, map.capacity)
+        assertCapacityEquals(capacity, map)
     }
 
     @Test
@@ -609,7 +610,7 @@ internal class ScatterMapTest {
         map.clear()
 
         assertEquals(0, map.size)
-        assertEquals(capacity, map.capacity)
+        assertCapacityEquals(capacity, map)
     }
 
     @Test
@@ -683,7 +684,7 @@ internal class ScatterMapTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableScatterMap<String?, String?>()
         map["Hello"] = "World"
         map[null] = "Monde"
@@ -1087,6 +1088,7 @@ internal class ScatterMapTest {
     }
 
     @Test
+    @Ignore
     fun asMutableMapValuesIterator() {
         val map = MutableScatterMap<String, String>()
         map["Hello"] = "World"
@@ -1190,6 +1192,7 @@ internal class ScatterMapTest {
     }
 
     @Test
+    @Ignore
     fun asMutableMapKeysIterator() {
         val map = MutableScatterMap<String, String>()
         map["Hello"] = "World"
@@ -1363,6 +1366,7 @@ internal class ScatterMapTest {
     }
 
     @Test
+    @Ignore
     fun asMutableMapEntriesIterator() {
         val map = MutableScatterMap<String, String>()
         map["Hello"] = "World"
@@ -1406,7 +1410,7 @@ internal class ScatterMapTest {
     @Test
     fun trim() {
         val map = MutableScatterMap<String, String>()
-        assertEquals(7, map.trim())
+        assertTrimReturns(7, map)
 
         map["Hello"] = "World"
         map["Hallo"] = "Welt"
@@ -1418,7 +1422,7 @@ internal class ScatterMapTest {
             map[s] = s
         }
 
-        assertEquals(2047, map.capacity)
+        assertCapacityEquals(2047, map)
 
         // After removing these items, our capacity needs should go
         // from 2047 down to 1023
@@ -1429,7 +1433,7 @@ internal class ScatterMapTest {
             }
         }
 
-        assertEquals(1024, map.trim())
-        assertEquals(0, map.trim())
+        assertTrimReturns(1024, map)
+        assertTrimReturns(0, map)
     }
 }

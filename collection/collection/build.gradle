@@ -91,6 +91,16 @@ kotlin {
         jsMain.dependsOn(jsWasmMain)
         jvmMain.dependsOn(jbMain)
 
+        nonJsMain.dependsOn(commonMain)
+        jvmMain.dependsOn(nonJsMain)
+        nativeMain.dependsOn(nonJsMain)
+        wasmJsMain.dependsOn(nonJsMain)
+
+        nonJsTest.dependsOn(commonTest)
+        jvmTest.dependsOn(nonJsTest)
+        nativeTest.dependsOn(nonJsTest)
+        wasmJsTest.dependsOn(nonJsTest)
+
         wasmJsMain.dependsOn(jsWasmMain)
 
         nativeMain.dependsOn(jsNativeMain)
