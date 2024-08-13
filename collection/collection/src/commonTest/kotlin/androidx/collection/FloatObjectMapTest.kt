@@ -622,7 +622,7 @@ internal class FloatObjectMapTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableFloatObjectMap<String?>()
         map[1f] = "World"
         map[2f] = null

@@ -601,7 +601,7 @@ internal class ObjectIntTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableObjectIntMap<String?>()
         map["Hello"] = 1
         map[null] = 2

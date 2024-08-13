@@ -376,7 +376,7 @@ internal class LongSetTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val set = MutableLongSet()
         set += 1L
         set += 5L
