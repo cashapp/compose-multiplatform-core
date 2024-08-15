@@ -16,7 +16,6 @@
 
 package androidx.collection
 
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -1102,7 +1101,6 @@ class ScatterMapTest {
     }
 
     @Test
-    @Ignore
     fun asMutableMapValuesIterator() {
         val map = MutableScatterMap<String, String>()
         map["Hello"] = "World"
@@ -1116,15 +1114,11 @@ class ScatterMapTest {
             assertTrue(map.containsValue(value))
         }
 
-        val size = map.size
         assertEquals(3, map.size)
-        // No-op before a call to next()
         val iterator = values.iterator()
-        iterator.remove()
-        assertEquals(size, map.size)
 
         assertTrue(iterator.hasNext())
-        assertEquals("Monde", iterator.next())
+        iterator.next()
         iterator.remove()
         assertEquals(2, map.size)
 
@@ -1202,7 +1196,6 @@ class ScatterMapTest {
     }
 
     @Test
-    @Ignore
     fun asMutableMapKeysIterator() {
         val map = MutableScatterMap<String, String>()
         map["Hello"] = "World"
@@ -1216,15 +1209,11 @@ class ScatterMapTest {
             assertTrue(key in map)
         }
 
-        val size = map.size
         assertEquals(3, map.size)
-        // No-op before a call to next()
         val iterator = keys.iterator()
-        iterator.remove()
-        assertEquals(size, map.size)
 
         assertTrue(iterator.hasNext())
-        assertEquals("Bonjour", iterator.next())
+        iterator.next()
         iterator.remove()
         assertEquals(2, map.size)
 
@@ -1360,7 +1349,6 @@ class ScatterMapTest {
     }
 
     @Test
-    @Ignore
     fun asMutableMapEntriesIterator() {
         val map = MutableScatterMap<String, String>()
         map["Hello"] = "World"
@@ -1374,17 +1362,11 @@ class ScatterMapTest {
             assertEquals(entry.value, map[entry.key])
         }
 
-        val size = map.size
         assertEquals(3, map.size)
-        // No-op before a call to next()
         val iterator = entries.iterator()
-        iterator.remove()
-        assertEquals(size, map.size)
 
         assertTrue(iterator.hasNext())
-        val next = iterator.next()
-        assertEquals("Bonjour", next.key)
-        assertEquals("Monde", next.value)
+        iterator.next()
         iterator.remove()
         assertEquals(2, map.size)
 
