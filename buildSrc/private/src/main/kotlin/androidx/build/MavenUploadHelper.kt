@@ -161,6 +161,29 @@ private fun Project.configureComponentPublishing(
             it.maven { repo ->
                 repo.setUrl(getRepositoryDirectory())
             }
+            // Want to push to an internal repository for testing?
+            // Set the following properties in ~/.gradle/gradle.properties.
+            //
+            // internalUrl=YOUR_INTERNAL_URL
+            // internalUsername=YOUR_USERNAME
+            // internalPassword=YOUR_PASSWORD
+            //
+            // Then run the following command to publish a new internal release:
+            //
+            // ./gradlew publishAllPublicationsToInternalRepository -DRELEASE_SIGNING_ENABLED=false
+            val internalUrl = project.providers.gradleProperty("internalUrl")
+            val internalUsername = project.providers.gradleProperty("internalUsername")
+            val internalPassword = project.providers.gradleProperty("internalPassword")
+            if (internalUrl.isPresent && internalUsername.isPresent && internalPassword.isPresent) {
+                it.maven {
+                    it.name = "internal"
+                    it.setUrl(internalUrl)
+                    it.credentials {
+                        it.username = internalUsername.get()
+                        it.password = internalPassword.get()
+                    }
+                }
+            }
         }
         publications {
             if (appliesJavaGradlePluginPlugin()) {
