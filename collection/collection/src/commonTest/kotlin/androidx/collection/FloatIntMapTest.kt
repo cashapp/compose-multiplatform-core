@@ -585,7 +585,7 @@ internal class FloatIntMapTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val map = MutableFloatIntMap()
         map[1f] = 1
 
