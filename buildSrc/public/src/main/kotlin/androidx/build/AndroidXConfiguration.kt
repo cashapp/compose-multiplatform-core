@@ -57,7 +57,7 @@ enum class KotlinTarget(val apiVersion: KotlinVersion, val catalogVersion: Strin
     KOTLIN_1_8(KotlinVersion.KOTLIN_1_8, "kotlin18"),
     KOTLIN_1_9(KotlinVersion.KOTLIN_1_9, "kotlin19"),
     KOTLIN_2_0(KotlinVersion.KOTLIN_2_0, "kotlin"),
-    DEFAULT(KOTLIN_1_8);
+    DEFAULT(KOTLIN_2_0);
 
     constructor(
         kotlinTarget: KotlinTarget

@@ -39,3 +39,10 @@ __pycache__
 
 # Don't ignore src files under build package
 !**/src/**/build
+
+# JESSES
+.kotlin
+kotlin-js-store
+yarn-offline-mirror
+jbdeps
+
