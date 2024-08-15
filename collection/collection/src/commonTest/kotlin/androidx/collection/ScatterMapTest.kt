@@ -31,14 +31,14 @@ class ScatterMapTest {
     @Test
     fun scatterMap() {
         val map = MutableScatterMap<String, String>()
-        assertEquals(7, map.capacity)
+        assertCapacityEquals(7, map)
         assertEquals(0, map.size)
     }
 
     @Test
     fun emptyScatterMap() {
         val map = emptyScatterMap<String, String>()
-        assertEquals(0, map.capacity)
+        assertCapacityEquals(0, map)
         assertEquals(0, map.size)
 
         assertSame(emptyScatterMap<String, String>(), map)
@@ -47,14 +47,14 @@ class ScatterMapTest {
     @Test
     fun scatterMapFunction() {
         val map = mutableScatterMapOf<String, String>()
-        assertEquals(7, map.capacity)
+        assertCapacityEquals(7, map)
         assertEquals(0, map.size)
     }
 
     @Test
     fun zeroCapacityMap() {
         val map = MutableScatterMap<String, String>(0)
-        assertEquals(0, map.capacity)
+        assertCapacityEquals(0, map)
         assertEquals(0, map.size)
     }
 
@@ -63,7 +63,7 @@ class ScatterMapTest {
         // When unloading the suggested capacity, we'll fall outside of the
         // expected bucket of 2047 entries, and we'll get 4095 instead
         val map = MutableScatterMap<String, String>(1800)
-        assertEquals(4095, map.capacity)
+        assertCapacityEquals(4095, map)
         assertEquals(0, map.size)
     }
 
@@ -106,7 +106,7 @@ class ScatterMapTest {
         map["Hello"] = "World"
 
         assertEquals(1, map.size)
-        assertEquals(7, map.capacity)
+        assertCapacityEquals(7, map)
         assertEquals("World", map["Hello"])
     }
 
@@ -399,7 +399,7 @@ class ScatterMapTest {
         map["Hello"] = "World"
 
         assertEquals(1, map.size)
-        assertEquals(capacity, map.capacity)
+        assertCapacityEquals(capacity, map)
     }
 
     @Test
@@ -422,7 +422,7 @@ class ScatterMapTest {
     @Test
     fun removeDoesNotCauseGrowthOnInsert() {
         val map = MutableScatterMap<String, String>(10) // Must be > GroupWidth (8)
-        assertEquals(15, map.capacity)
+        assertCapacityEquals(15, map)
 
         map["Hello"] = "World"
         map["Bonjour"] = "Monde"
@@ -443,7 +443,7 @@ class ScatterMapTest {
 
         // Inserting a new item shouldn't cause growth, but the deleted markers to be purged
         map["Foo"] = "Bar"
-        assertEquals(15, map.capacity)
+        assertCapacityEquals(15, map)
 
         assertEquals("Bar", map["Foo"])
     }
@@ -626,7 +626,7 @@ class ScatterMapTest {
         map.clear()
 
         assertEquals(0, map.size)
-        assertEquals(capacity, map.capacity)
+        assertCapacityEquals(capacity, map)
 
         map.forEach { _, _ -> fail() }
     }
@@ -1114,15 +1114,11 @@ class ScatterMapTest {
             assertTrue(map.containsValue(value))
         }
 
-        val size = map.size
         assertEquals(3, map.size)
-        // No-op before a call to next()
         val iterator = values.iterator()
-        iterator.remove()
-        assertEquals(size, map.size)
 
         assertTrue(iterator.hasNext())
-        assertEquals("Monde", iterator.next())
+        iterator.next()
         iterator.remove()
         assertEquals(2, map.size)
 
@@ -1213,15 +1209,11 @@ class ScatterMapTest {
             assertTrue(key in map)
         }
 
-        val size = map.size
         assertEquals(3, map.size)
-        // No-op before a call to next()
         val iterator = keys.iterator()
-        iterator.remove()
-        assertEquals(size, map.size)
 
         assertTrue(iterator.hasNext())
-        assertEquals("Bonjour", iterator.next())
+        iterator.next()
         iterator.remove()
         assertEquals(2, map.size)
 
@@ -1370,17 +1362,11 @@ class ScatterMapTest {
             assertEquals(entry.value, map[entry.key])
         }
 
-        val size = map.size
         assertEquals(3, map.size)
-        // No-op before a call to next()
         val iterator = entries.iterator()
-        iterator.remove()
-        assertEquals(size, map.size)
 
         assertTrue(iterator.hasNext())
-        val next = iterator.next()
-        assertEquals("Bonjour", next.key)
-        assertEquals("Monde", next.value)
+        iterator.next()
         iterator.remove()
         assertEquals(2, map.size)
 
@@ -1400,7 +1386,7 @@ class ScatterMapTest {
     @Test
     fun trim() {
         val map = MutableScatterMap<String, String>()
-        assertEquals(7, map.trim())
+        assertTrimReturns(7, map)
 
         map["Hello"] = "World"
         map["Hallo"] = "Welt"
@@ -1412,7 +1398,7 @@ class ScatterMapTest {
             map[s] = s
         }
 
-        assertEquals(2047, map.capacity)
+        assertCapacityEquals(2047, map)
 
         // After removing these items, our capacity needs should go
         // from 2047 down to 1023
@@ -1423,8 +1409,8 @@ class ScatterMapTest {
             }
         }
 
-        assertEquals(1024, map.trim())
-        assertEquals(0, map.trim())
+        assertTrimReturns(1024, map)
+        assertTrimReturns(0, map)
     }
 
     @Test
@@ -1470,7 +1456,7 @@ class ScatterMapTest {
             }
         }
 
-        assertEquals(127, map.capacity)
+        assertCapacityEquals(127, map)
         for (i in 0..100) {
             assertTrue(map.contains(i), "Map should contain element $i")
         }

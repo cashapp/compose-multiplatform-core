@@ -864,39 +864,39 @@ class ScatterSetTest {
 
     @Test
     fun insertManyRemoveMany() {
-        val map = MutableScatterMap<Int, String>()
+        val set = MutableScatterSet<Int>()
 
         for (i in 0..100) {
-            map[i] = i.toString()
+            set.add(i)
         }
 
         for (i in 0..100) {
             if (i % 2 == 0) {
-                map.remove(i)
+                set.remove(i)
             }
         }
 
         for (i in 0..100) {
             if (i % 2 == 0) {
-                map[i] = i.toString()
+                set.add(i)
             }
         }
 
         for (i in 0..100) {
             if (i % 2 != 0) {
-                map.remove(i)
+                set.remove(i)
             }
         }
 
         for (i in 0..100) {
             if (i % 2 != 0) {
-                map[i] = i.toString()
+                set.add(i)
             }
         }
 
-        assertEquals(127, map.capacity)
+        assertEquals(127, set.capacity)
         for (i in 0..100) {
-            assertTrue(map.contains(i), "Map should contain element $i")
+            assertTrue(set.contains(i), "Map should contain element $i")
         }
     }
 
