@@ -28,21 +28,21 @@ internal class ScatterSetTest {
     @Test
     fun emptyScatterSetConstructor() {
         val set = MutableScatterSet<String>()
-        assertEquals(7, set.capacity)
+        assertCapacityEquals(7, set)
         assertEquals(0, set.size)
     }
 
     @Test
     fun immutableEmptyScatterSet() {
         val set: ScatterSet<String> = emptyScatterSet()
-        assertEquals(0, set.capacity)
+        assertCapacityEquals(0, set)
         assertEquals(0, set.size)
     }
 
     @Test
     fun zeroCapacityScatterSet() {
         val set = MutableScatterSet<String>(0)
-        assertEquals(0, set.capacity)
+        assertCapacityEquals(0, set)
         assertEquals(0, set.size)
     }
 
@@ -51,7 +51,7 @@ internal class ScatterSetTest {
         // When unloading the suggested capacity, we'll fall outside of the
         // expected bucket of 2047 entries, and we'll get 4095 instead
         val set = MutableScatterSet<String>(1800)
-        assertEquals(4095, set.capacity)
+        assertCapacityEquals(4095, set)
         assertEquals(0, set.size)
     }
 
@@ -324,7 +324,7 @@ internal class ScatterSetTest {
         set += "Hello"
 
         assertEquals(1, set.size)
-        assertEquals(capacity, set.capacity)
+        assertCapacityEquals(capacity, set)
     }
 
     @Test
@@ -474,7 +474,7 @@ internal class ScatterSetTest {
         set.clear()
 
         assertEquals(0, set.size)
-        assertEquals(capacity, set.capacity)
+        assertCapacityEquals(capacity, set)
     }
 
     @Test
@@ -540,7 +540,7 @@ internal class ScatterSetTest {
     }
 
     @Test
-    fun equals() {
+    fun equalsTest() {
         val set = MutableScatterSet<String?>()
         set += "Hello"
         set += null
@@ -708,13 +708,13 @@ internal class ScatterSetTest {
         assertEquals(0, set.trim())
         set.clear()
         assertEquals(capacity, set.trim())
-        assertEquals(0, set.capacity)
+        assertCapacityEquals(0, set)
         set.addAll(arrayOf("Hello", "World", "Hola", "Mundo", "Bonjour", "Monde", "Hallo", "Welt",
             "Konnichiwa", "Sekai", "Ciao", "Mondo", "Annyeong", "Sesang"))
         set.removeAll(arrayOf("Hallo", "Welt", "Konnichiwa", "Sekai", "Ciao", "Mondo", "Annyeong",
             "Sesang"))
-        assertTrue(set.trim() > 0)
-        assertEquals(capacity, set.capacity)
+        assertTrimCompacts(set)
+        assertCapacityEquals(capacity, set)
     }
 
     @Test
